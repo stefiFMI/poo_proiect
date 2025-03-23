@@ -51,7 +51,7 @@ public:
 
     [[nodiscard]] Pozitie getPozitie(const unsigned long long index) const
     {
-        if (index >= 0 && index < traseu.size())
+        if (index < traseu.size())
             return traseu[index];
 
         return traseu.back();
