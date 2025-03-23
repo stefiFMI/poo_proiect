@@ -49,7 +49,7 @@ public:
     //     return traseu;
     // }
 
-    [[nodiscard]] Pozitie getPozitie(const int index) const
+    [[nodiscard]] Pozitie getPozitie(const unsigned long long index) const
     {
         if (index >= 0 && index < traseu.size())
             return traseu[index];
@@ -76,7 +76,7 @@ class Inamici
     movement_speed move_spd;
     bool rez_magie;
     Pozitie poz_curenta;
-    int index_pozitie;
+    unsigned long long index_pozitie;
 
 public:
     Inamici(const std::string& nume, const int hp, const int sum, const movement_speed& move_s,
@@ -343,7 +343,7 @@ int main()
 
     P1.plaseazaTurn(t1);
 
-    for (int i = 0; i < drum.getLungime(); i++)
+    for (unsigned long long i = 0; i < drum.getLungime(); i++)
     {
         i1.afiseazaPoz(drum);
         t1.ataca(i1);
