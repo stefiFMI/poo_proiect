@@ -30,6 +30,7 @@
 
 
 
+
 ## Instrucțiuni de compilare
 
 Proiectul este configurat cu CMake.
