@@ -1,31 +1,31 @@
 # SubjectRush
 ## 🎓 SubjectRush – Supraviețuiește Semestrului 2! 🚀
 ### 📢 Bine ai venit... sau poate nu?
-- [ ] Bine ai venit rau ai nimerit in semestrul 2 din anul intai la FMI Informatica. Inteleg ca ai trecut prin primul
-- [ ] semestru cu bine daca citesti asta, daca nu, te astept la anul la ASC... Daca vrei (si mai poti) sa treci cu bine
-- [ ] si de semestrul asta, trebuie sa folosesti cateva metode simple, dar eficiente, pentru a promova toate materiile. 
-- [ ] Stiu ca te gandesti la ChatG.. in fine in acest joc vom folosi cateva metode conventionale de a trece examenele.
-- [ ] Cred ca ai folosit la un moment dat una din metodele astea: Somn, RedBull, Intrebari si Invatat. Acestea reprezinta
-- [ ] singura ta modalitate de a trece cu bine de inamicii nostrii de temut:
-- [ ] 👾 BD (Baze de Date)
-- [ ] 👾 SD (Structuri de Date)
-- [ ] 👾 LMC (Logică Matematică și Computațională)
-- [ ] 👾 GAL (Geometrie și Algebră Liniară)
-- [ ] 👾 LFA (Limbaje Formale și Automate)
-- [ ] 💀 Boss-ul Final: POO (nu mai are nevoie de descriere...) 😨
-- [ ] Daca te intrebi cum sa folosesti metodele de mai sus ca sa treci anul, continua sa citesti.📚🔥
+Bine ai venit rau ai nimerit in semestrul 2 din anul intai la FMI Informatica. Inteleg ca ai trecut prin primul
+semestru cu bine daca citesti asta, daca nu, te astept la anul la ASC... Daca vrei (si mai poti) sa treci cu bine
+si de semestrul asta, trebuie sa folosesti cateva metode simple, dar eficiente, pentru a promova toate materiile. 
+Stiu ca te gandesti la ChatG.. in fine in acest joc vom folosi cateva metode conventionale de a trece examenele.
+Cred ca ai folosit la un moment dat una din metodele astea: Somn, RedBull, Intrebari si Invatat. Acestea reprezinta
+singura ta modalitate de a trece cu bine de inamicii nostrii de temut:
+👾 BD (Baze de Date)
+👾 SD (Structuri de Date)
+👾 LMC (Logică Matematică și Computațională)
+👾 GAL (Geometrie și Algebră Liniară)
+👾 LFA (Limbaje Formale și Automate)
+💀 Boss-ul Final: POO (nu mai are nevoie de descriere...) 😨
+Daca te intrebi cum sa folosesti metodele de mai sus ca sa treci anul, continua sa citesti.📚🔥
 
 ### 🎯 Instructiuni
-- [ ] Joculetul este de tipul Tower-Defense. Te folosesti de un set de turnuri implicite denumite dupa metodele prezentate 
-- [ ] mai sus. Acestea te apara de RESTANTA atacand inamicii(materiile) scazadu-le dificultatea(hp).
+Joculetul este de tipul Tower-Defense. Te folosesti de un set de turnuri implicite denumite dupa metodele prezentate 
+mai sus. Acestea te apara de RESTANTA atacand inamicii(materiile) scazadu-le dificultatea(hp).
 ### 📌 Reguli de bază:
-- [ ] ✔ Turnurile pot fi amplasate doar în locuri prestabilite.
-- [ ] ✔ Inamicii vin în valuri. 📊
-- [ ] ✔ Resursa ta principală este Timpul – cea mai prețioasă resursa a unui student 🕒
-- [ ] ✔ Fiecare turn necesită o anumită cantitate de timp pentru a fi plasat. Unele turnuri necesita mai mult timp decat altele. Cand omori un inamic primesti
-- [ ] ✔ Daca un inamic ajunge la capatul drumului, iti scade o viata..sau mai multe? Incearca si o sa vezi. 
-- [ ] ✔ Ai dreptul la 10 RESTANTE inainte sa repeti anul. 
-- [ ] Scopul tau este crearea unei strategii eficieinte de gestionare a timpului pentru a nu repeta anul.
+✔ Turnurile pot fi amplasate doar în locuri prestabilite.
+✔ Inamicii vin în valuri. 📊
+✔ Resursa ta principală este Timpul – cea mai prețioasă resursa a unui student 🕒
+✔ Fiecare turn necesită o anumită cantitate de timp pentru a fi plasat. Unele turnuri necesita mai mult timp decat altele. Cand omori un inamic primesti
+✔ Daca un inamic ajunge la capatul drumului, iti scade o viata..sau mai multe? Incearca si o sa vezi. 
+✔ Ai dreptul la 10 RESTANTE inainte sa repeti anul. 
+Scopul tau este crearea unei strategii eficieinte de gestionare a timpului pentru a nu repeta anul.
 - ### 🎯 SUCCES! 🚀
 
 
