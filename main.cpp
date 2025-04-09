@@ -374,7 +374,7 @@ public:
 void Jucator::alegeSiPlaseazaTurn(const std::vector<Turn>& turnuriDisponibile, const std::vector<Pozitie>& p_turnuri)
 {
     std::cout << "\nTurnuri disponibile:\n";
-    for (auto i = 0; i < turnuriDisponibile.size(); i++)
+    for (long long unsigned int i = 0; i < turnuriDisponibile.size(); i++)
     {
         std::cout << i + 1 << ". " << turnuriDisponibile[i] << " | Pret: " << turnuriDisponibile[i].getPret() << "\n";
     }
@@ -408,7 +408,7 @@ bool Jucator::alegePozTurn(const std::vector<Pozitie>& p_turnuri, Turn& T) const
 
     std::cout << "Pozitii posibile: ";
 
-    for (auto i = 0; i < p_turnuri.size(); i++)
+    for (long long unsigned int i = 0; i < p_turnuri.size(); i++)
         if (i != p_turnuri.size() - 1)
             std::cout << p_turnuri[i] << " sau ";
         else
