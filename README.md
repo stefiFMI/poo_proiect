@@ -22,7 +22,7 @@ mai sus. Acestea te apara de RESTANTA atacand inamicii(materiile) scazadu-le dif
 - ✔ Turnurile pot fi amplasate doar în locuri prestabilite.
 - ✔ Inamicii vin în valuri. 📊
 - ✔ Resursa ta principală este Timpul – cea mai prețioasă resursa a unui student 🕒
-- ✔ Fiecare turn necesită o anumită cantitate de timp pentru a fi plasat. Unele turnuri necesita mai mult timp decat altele. Cand omori un inamic primesti
+- ✔ Fiecare turn necesită o anumită cantitate de timp pentru a fi plasat. Unele turnuri necesita mai mult timp decat altele. Cand omori un inamic primesti timp.
 - ✔ Daca un inamic ajunge la capatul drumului, iti scade o viata..sau mai multe? Incearca si o sa vezi. 
 - ✔ Ai dreptul la 10 RESTANTE inainte sa repeti anul. 
 - Scopul tau este crearea unei strategii eficieinte de gestionare a timpului pentru a nu repeta anul.
