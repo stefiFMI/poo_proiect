@@ -129,16 +129,18 @@ public:
             return *this;
         nume_inamic = other.nume_inamic;
         HP = other.HP;
+        suma =other.suma;
         move_spd.val = other.move_spd.val;
         move_spd.tip = other.move_spd.tip;
         rez_magie = other.rez_magie;
         poz_curenta = other.poz_curenta;
+        index_pozitie = other.index_pozitie;
         return *this;
     }
 
     friend bool operator==(const Inamic& other1, const Inamic& other2)
     {
-        if (other1.HP == other2.HP && other1.nume_inamic == other2.nume_inamic &&
+        if (other1.HP == other2.HP && other1.nume_inamic == other2.nume_inamic && other1.suma == other2.suma &&
             other1.move_spd.val == other2.move_spd.val && other1.move_spd.tip == other2.move_spd.tip &&
             other1.rez_magie == other2.rez_magie && other1.poz_curenta == other2.poz_curenta)
             return true;
@@ -162,7 +164,7 @@ public:
         return HP;
     }
 
-    [[nodiscard]] std::string get_nume_inamic() const
+    [[nodiscard]] const std::string& get_nume_inamic() const
     {
         return nume_inamic;
     }
@@ -231,7 +233,7 @@ class Turn
     Glont tip_glont;
     Pozitie poz_turn;   // nici asta
     std::vector<int> damage;
-    std::vector<float> range;
+    std::vector<double> range;
     std::vector<int> attk_spd;
     std::vector<int> pret;
     int nivel;
@@ -240,7 +242,7 @@ public:
     Turn(const std::string& nume_t,
             const Glont& tip_g,
             const std::vector<int>& dmg,
-            const std::vector<float>& rng,
+            const std::vector<double>& rng,
             const std::vector<int>& atk,
             const std::vector<int>& prt,
             const int& niv) :   nume_turn{nume_t},
@@ -257,9 +259,9 @@ public:
         return os << object.nume_turn << " Nivel: " << object.nivel;
     }
 
-    void set_poz_turn(const Pozitie& poz_turn)
+    void set_poz_turn(const Pozitie& poz_turn_)
     {
-        this->poz_turn = poz_turn;
+        this->poz_turn = poz_turn_;
     }
 
     [[nodiscard]] Pozitie getPoz_pos() const
@@ -272,11 +274,11 @@ public:
         return pret[nivel - 1];
     }
 
-    void cresteNivel()
-    {
-        if (nivel <= 4)
-            nivel++;
-    }
+    // void cresteNivel()
+    // {
+    //     if (nivel <= 4)
+    //         nivel++;
+    // }
 
 
 
@@ -332,7 +334,7 @@ private:
     void castigaBani(const Inamic& inamic) { bani = bani + inamic.getSuma(); }
 
 public:
-    [[nodiscard]] std::vector<Turn> get_turnuri() const
+    [[nodiscard]] const std::vector<Turn>& get_turnuri() const
     {
         return turnuri;
     }
@@ -342,10 +344,10 @@ public:
         return nr_vieti;
     }
 
-    [[nodiscard]] int get_bani() const
-    {
-        return bani;
-    }
+    // [[nodiscard]] int get_bani() const
+    // {
+    //     return bani;
+    // }
 
     void actiuniJucator(const Inamic& inamic, const Drum& drum)
     {
@@ -477,9 +479,9 @@ int main()
     const std::vector dmgt2 = {10,15,20,25};
     const std::vector dmgt3 = {6,13,17,20};
     const std::vector dmgt4 = {2,4,7,10};
-    const std::vector<float> rng1 = {1.5,1.7,1.9,2.1};
-    const std::vector<float> rng2 = {1.3,1.4,1.5,1.7};
-    const std::vector<float> rng3 = {1,1.1,1.2,1.4};
+    const std::vector<double> rng1 = {1.5,1.7,1.9,2.1};
+    const std::vector<double> rng2 = {1.3,1.4,1.5,1.7};
+    const std::vector<double> rng3 = {1,1.1,1.2,1.4};
     const std::vector atk_spd = {1,2,3,4};
     const std::vector prt = {70,110,160,210};
     int nivel = 1;
@@ -536,7 +538,7 @@ int main()
                 }
             }
 
-            for (Turn& t : P1.get_turnuri())
+            for (const Turn& t : P1.get_turnuri())
             {
                 for (Inamic& i : inamici_wave)
                 {
