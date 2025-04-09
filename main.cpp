@@ -2,6 +2,10 @@
 #include <iostream>
 #include <ostream>
 #include <vector>
+#include <algorithm>
+#include <fstream>
+
+std::ifstream fin("tastatura.txt");
 
 class Pozitie
 {
@@ -153,9 +157,14 @@ public:
     {
         return poz_curenta;
     }
-    [[nodiscard]] int getHP() const
+    [[nodiscard]] int get_HP() const
     {
         return HP;
+    }
+
+    [[nodiscard]] std::string get_nume_inamic() const
+    {
+        return nume_inamic;
     }
 
     void set_hp(const int hp)
@@ -291,9 +300,9 @@ void Turn::ataca(Inamic& inamic) const
 {
     if (detecteazaInamic(inamic))
     {
-        inamic.set_hp(inamic.getHP() - damage[nivel - 1]);
-        std::cout << "Turnul " << nume_turn << " a lovit "
-              << "! HP ramas: " << inamic.getHP() << std::endl;
+        inamic.set_hp(inamic.get_HP() - damage[nivel - 1]);
+        std::cout << "Turnul " << nume_turn << " a lovit inamicul " << inamic.get_nume_inamic()
+              << "! HP ramas: " << inamic.get_HP() << std::endl;
     }
 }
 
@@ -381,7 +390,7 @@ void Jucator::alegeSiPlaseazaTurn(const std::vector<Turn>& turnuriDisponibile, c
 
     int alegere;
     std::cout << "Alege un turn (un numar de la 1 la 4) sau apasa 0 pentru a anula: ";
-    std::cin >> alegere;
+    fin >> alegere;
     if (alegere < 0 || alegere > 4)
     {
         std::cout << "Alegere invalida\n";
@@ -414,7 +423,7 @@ bool Jucator::alegePozTurn(const std::vector<Pozitie>& p_turnuri, Turn& T) const
         else
             std::cout << p_turnuri[i] << ": ";
 
-    std::cin >> x >> y;
+    fin >> x >> y;
     const Pozitie pozNoua(x, y);
     bool ok = false;
 
@@ -494,78 +503,71 @@ int main()
     Inamic i5{"LMC", 25, 7, {1, "mediu"}, false, {0, 0}};
     Inamic i6{"POO", 1000, 100, {1, "lent"}, false, {0, 0}};
 
-    std::vector<Inamic> inamici{i1, i1, i1};
-    while (P1.get_bani() >= prt[nivel - 1])
-    {
-        P1.alegeSiPlaseazaTurn(turnuriDisponibile, poz_pos_turn);
-        for (auto& turn : P1.get_turnuri())
-            std::cout << turn << std::endl;
-    }
+    P1.alegeSiPlaseazaTurn(turnuriDisponibile, poz_pos_turn);
 
-    while (!inamici.empty())
+
+    for (int wave = 1; wave <= 3 && P1.get_nr_vieti() > 0; wave++)
     {
-        for (auto& inamic : inamici)
-        {
-            inamic.afiseazaPoz(drum);
-            if (inamic.final_drum(drum))
-                inamici.pop_back();
+        std::cout << "\n--- Wave " << wave << "/3 ---\n";
+
+        std::vector<Inamic> inamici_wave;
+
+        if (wave == 1)
+            inamici_wave = {i1, i5};
+        else
+            if (wave == 2)
+                inamici_wave = {i2, i3};
             else
-                inamic.mutaInamic(drum);
-            for (auto& turn : P1.get_turnuri())
-            {
-                turn.ataca(inamic);
+                if (wave == 3)
+                    inamici_wave = {i6};
 
-                P1.actiuniJucator(inamic, drum);
-                if (inamic.mort())
-                    inamici.pop_back();
-                if (inamici.empty())
-                    break;
-            }
-        }
-        if (P1.get_nr_vieti() <= 0)
+        bool toti_terminati = false;
+        while (!toti_terminati)
         {
-            std::cout << "Ai luat RESTANTA la toate materiile...o sa repeti anul...\n";
-            break;
+            toti_terminati = true;
+
+            for (Inamic& inamic : inamici_wave)
+            {
+                if (!inamic.mort() && !inamic.final_drum(drum))
+                {
+                    inamic.mutaInamic(drum);
+                    inamic.afiseazaPoz(drum);
+                    toti_terminati = false;
+                }
+            }
+
+            for (Turn& t : P1.get_turnuri())
+            {
+                for (Inamic& i : inamici_wave)
+                {
+                    if (!i.mort())
+                    {
+                        t.ataca(i);
+                    }
+                }
+            }
+            if (toti_terminati == false)
+                for (const Inamic& inamic : inamici_wave)
+                {
+                    P1.actiuniJucator(inamic, drum);
+                }
+
+
+            inamici_wave.erase(std::remove_if(inamici_wave.begin(), inamici_wave.end(),
+                [](const Inamic& i) { return i.mort(); }), inamici_wave.end());
+
+            std::cout << "\n--- Tura urmatoare ---\n";
+            fin.get();
         }
+
+        std::cout << "\nWave-ul " << wave << " finalizat!\n";
+        fin.get();
     }
 
-    // for (auto& inamic : inamici)
-    // {
-    //     inamic.afiseazaPoz(drum);
-    //     if (P1.alegeSiPlaseazaTurn(turnuriDisponibile, poz_pos_turn))
-    //     {
-    //         for (auto& turn : P1.get_turnuri())
-    //         {
-    //             turn.ataca(inamic);
-    //         }
-    //     }
-    // }
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // //P1.plaseazaTurn(t1);
-    //
-    // for (unsigned long long i = 0; i < drum.getLungime(); i++)
-    // {
-    //     if (!i1.mort())
-    //     {
-    //         i1.afiseazaPoz(drum);
-    //         t1.ataca(i1);
-    //         P1.actiuniJucator(i1, drum);
-    //         i1.mutaInamic(drum);
-    //     }
-    // }
-    //std::cout << P1;
+    if (P1.get_nr_vieti() <= 0)
+        std::cout << "\nGAME OVER! Ai ramas fara RESTANTE disponibile. Ai picat anul...\n";
+    else
+        std::cout << "\nFELICITARI! Ai trecut anul.\n";
     return 0;
 }
 
