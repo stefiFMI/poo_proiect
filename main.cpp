@@ -7,6 +7,8 @@
 
 std::ifstream fin("tastatura.txt");
 
+class Jucator;
+
 class Pozitie
 {
     float x;
@@ -225,6 +227,18 @@ public:
     {
         return os << object.viteza << object.poz_plecare << object.poz_finala;
     }
+
+    friend bool operator==(const Glont& lhs, const Glont& rhs)
+    {
+        return lhs.viteza == rhs.viteza
+            && lhs.poz_plecare == rhs.poz_plecare
+            && lhs.poz_finala == rhs.poz_finala;
+    }
+
+    friend bool operator!=(const Glont& lhs, const Glont& rhs)
+    {
+        return !(lhs == rhs);
+    }
 };
 
 class Turn
@@ -259,9 +273,31 @@ public:
         return os << object.nume_turn << " Nivel: " << object.nivel;
     }
 
+    friend bool operator==(const Turn& lhs, const Turn& rhs)
+    {
+        return lhs.nume_turn == rhs.nume_turn
+            && lhs.tip_glont == rhs.tip_glont
+            && lhs.poz_turn == rhs.poz_turn
+            && lhs.damage == rhs.damage
+            && lhs.range == rhs.range
+            && lhs.attk_spd == rhs.attk_spd
+            && lhs.pret == rhs.pret
+            && lhs.nivel == rhs.nivel;
+    }
+
+    friend bool operator!=(const Turn& lhs, const Turn& rhs)
+    {
+        return !(lhs == rhs);
+    }
+
     void set_poz_turn(const Pozitie& poz_turn_)
     {
         this->poz_turn = poz_turn_;
+    }
+
+    [[nodiscard]] std::string get_nume_turn() const
+    {
+        return nume_turn;
     }
 
     [[nodiscard]] Pozitie getPoz_pos() const
@@ -269,23 +305,26 @@ public:
         return poz_turn;
     }
 
-    [[nodiscard]] int getPret() const
+    [[nodiscard]] int get_Pret() const
     {
         return pret[nivel - 1];
     }
 
-    // void cresteNivel()
-    // {
-    //     if (nivel <= 4)
-    //         nivel++;
-    // }
+    [[nodiscard]] int get_nivel() const
+    {
+        return nivel;
+    }
 
-
-
+    void cresteNivel()
+    {
+        if (nivel <= 4)
+            nivel++;
+    }
 private:
     [[nodiscard]] bool detecteazaInamic(const Inamic& inamic) const;
 public:
     void ataca(Inamic& inamic) const;
+
 };
 
 bool Turn::detecteazaInamic(const Inamic& inamic) const
@@ -308,6 +347,7 @@ void Turn::ataca(Inamic& inamic) const
     }
 }
 
+
 class Jucator
 {
     std::string nume_jucator;
@@ -324,7 +364,7 @@ public:
 
     friend std::ostream& operator<<(std::ostream& os, const Jucator& obj)
     {
-        return os << obj.nume_jucator << " " << obj.bani << " " << obj.nr_vieti;
+        return os << "Numele tau: " << obj.nume_jucator << "\n" << "Ai " << obj.bani << " de bani.\n" << "Restante disponibile: " << obj.nr_vieti;
     }
 
 
@@ -344,10 +384,10 @@ public:
         return nr_vieti;
     }
 
-    // [[nodiscard]] int get_bani() const
-    // {
-    //     return bani;
-    // }
+    [[nodiscard]] int get_bani() const
+    {
+        return bani;
+    }
 
     void actiuniJucator(const Inamic& inamic, const Drum& drum)
     {
@@ -363,15 +403,26 @@ public:
                 std::cout << "Mai ai " << nr_vieti << " RESTANTE disponibile\n";
             }
     }
+
+    void scadeBani(const int valoare)
+    {
+        if (bani >= valoare)
+        {
+            bani = bani - valoare;
+            std::cout << "Mai ai : " << bani << " de bani\n";
+        }
+        else
+            std::cout << "Nu ai destui bani!\n";
+    }
 private:
     bool alegePozTurn(const std::vector<Pozitie>& p_turnuri, Turn& T) const;
 
     void plaseazaTurn(const Turn& turn)
     {
-        if (bani >= turn.getPret())
+        if (bani >= turn.get_Pret())
         {
-            bani = bani - turn.getPret();
-            std::cout << "Bani: " << bani << std::endl;
+            std::cout << "Ai plasat turnul la pozitia " << turn.getPoz_pos() << std::endl;
+            scadeBani(turn.get_Pret());
             turnuri.push_back(turn);
         }
         else
@@ -380,6 +431,8 @@ private:
 
 public:
     void alegeSiPlaseazaTurn(const std::vector<Turn>& turnuriDisponibile, const std::vector<Pozitie>& p_turnuri);
+
+    void upgrade(int t, const std::vector<int>& upgrade_val);
 };
 
 void Jucator::alegeSiPlaseazaTurn(const std::vector<Turn>& turnuriDisponibile, const std::vector<Pozitie>& p_turnuri)
@@ -387,7 +440,7 @@ void Jucator::alegeSiPlaseazaTurn(const std::vector<Turn>& turnuriDisponibile, c
     std::cout << "\nTurnuri disponibile:\n";
     for (long long unsigned int i = 0; i < turnuriDisponibile.size(); i++)
     {
-        std::cout << i + 1 << ". " << turnuriDisponibile[i] << " | Pret: " << turnuriDisponibile[i].getPret() << "\n";
+        std::cout << i + 1 << ". " << turnuriDisponibile[i] << " | Pret: " << turnuriDisponibile[i].get_Pret() << "\n";
     }
 
     int alegere;
@@ -453,6 +506,18 @@ bool Jucator::alegePozTurn(const std::vector<Pozitie>& p_turnuri, Turn& T) const
     return false;
 }
 
+void Jucator::upgrade(const int t, const std::vector<int>& upgrade_val)
+{
+    if (turnuri[t - 1].get_nivel() < 4)
+    {
+        scadeBani(upgrade_val[turnuri[t - 1].get_nivel()]);
+        turnuri[t - 1].cresteNivel();
+        std::cout << "Nivelul nou al turnului " << turnuri[t - 1].get_nume_turn() <<": " << turnuri[t - 1].get_nivel() << std::endl;
+    }
+    else
+        std::cout << "Nivel maxim atins\n";
+}
+
 
 // class Level
 // {
@@ -465,7 +530,27 @@ bool Jucator::alegePozTurn(const std::vector<Pozitie>& p_turnuri, Turn& T) const
 //
 // };
 
-
+void upgrade_Turn(Jucator& P, const std::vector<int>& upgrade_val)
+{
+    char al = 'y';
+    while (al == 'y')
+    {
+        std::cout << "Vrei sa faci upgrade unui turn? y/n:\n";
+        fin >> al;
+        if (al == 'y')
+        {
+            std::cout << "Carui turn vrei sa ii faci upgrade?(alege indexul turnului) \n";
+            for (int i = 0; i < P.get_turnuri().size(); i++)
+                std::cout << i + 1 << ". " << P.get_turnuri()[i] << std::endl;
+            int t;
+            fin >> t;
+            if (t >= 1 && t <= P.get_turnuri().size())
+                P.upgrade(t, upgrade_val);
+            else
+                std::cout << "Alege un turn valid!\n";
+        }
+    }
+}
 
 int main()
 {
@@ -483,15 +568,14 @@ int main()
     const std::vector<double> rng2 = {1.3,1.4,1.5,1.7};
     const std::vector<double> rng3 = {1,1.1,1.2,1.4};
     const std::vector atk_spd = {1,2,3,4};
-    const std::vector prt = {70,110,160,210};
-    int nivel = 1;
+    const std::vector<int> prt = {70, 110, 160, 210};
 
     Pozitie p1{0, 0};
     Glont g1{2, p1, p1};
-    Turn t1{"Invatat", g1, dmgt1, rng1, atk_spd, prt, nivel};
-    Turn t2{"Somn", g1, dmgt2, rng1, atk_spd, prt, nivel};
-    Turn t3{"Redbull", g1, dmgt3, rng2, atk_spd, prt, nivel};
-    Turn t4{"Intrebari", g1, dmgt4, rng3, atk_spd, prt, nivel};
+    Turn t1{"Invatat", g1, dmgt1, rng1, atk_spd, prt, 1};
+    Turn t2{"Somn", g1, dmgt2, rng1, atk_spd, prt, 1};
+    Turn t3{"Redbull", g1, dmgt3, rng2, atk_spd, prt, 1};
+    Turn t4{"Intrebari", g1, dmgt4, rng3, atk_spd, prt, 1};
 
 
     std::vector<Turn> turnuriDisponibile = {t1, t2, t3, t4};
@@ -505,12 +589,15 @@ int main()
     Inamic i5{"LMC", 25, 7, {1, "mediu"}, false, {0, 0}};
     Inamic i6{"POO", 1000, 100, {1, "lent"}, false, {0, 0}};
 
+    std::cout << P1 << std::endl;
     P1.alegeSiPlaseazaTurn(turnuriDisponibile, poz_pos_turn);
 
 
     for (int wave = 1; wave <= 3 && P1.get_nr_vieti() > 0; wave++)
     {
         std::cout << "\n--- Wave " << wave << "/3 ---\n";
+
+        upgrade_Turn(P1, prt);
 
         std::vector<Inamic> inamici_wave;
 
@@ -523,10 +610,15 @@ int main()
                 if (wave == 3)
                     inamici_wave = {i6};
 
-        bool toti_terminati = false;
-        while (!toti_terminati)
+        bool bucla_joc = false;
+        while (!bucla_joc)
         {
-            toti_terminati = true;
+            std::cout << "Vrei sa amplasezi un turn?  y/n: ";
+            char yn;
+            fin >> yn;
+            if (yn == 'y')
+                P1.alegeSiPlaseazaTurn(turnuriDisponibile, poz_pos_turn);
+            bucla_joc = true;
 
             for (Inamic& inamic : inamici_wave)
             {
@@ -534,7 +626,7 @@ int main()
                 {
                     inamic.mutaInamic(drum);
                     inamic.afiseazaPoz(drum);
-                    toti_terminati = false;
+                    bucla_joc = false;
                 }
             }
 
@@ -548,7 +640,7 @@ int main()
                     }
                 }
             }
-            if (toti_terminati == false)
+            if (bucla_joc == false)
                 for (const Inamic& inamic : inamici_wave)
                 {
                     P1.actiuniJucator(inamic, drum);
@@ -557,13 +649,16 @@ int main()
 
             inamici_wave.erase(std::remove_if(inamici_wave.begin(), inamici_wave.end(),
                 [](const Inamic& i) { return i.mort(); }), inamici_wave.end());
-
-            std::cout << "\n--- Tura urmatoare ---\n";
-            fin.get();
+            if (bucla_joc == false)
+            {
+                std::cout << "\n--- Tura urmatoare ---\n";
+                fin.get();
+            }
         }
 
         std::cout << "\nWave-ul " << wave << " finalizat!\n";
         fin.get();
+
     }
 
     if (P1.get_nr_vieti() <= 0)
