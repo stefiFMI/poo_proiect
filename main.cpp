@@ -295,7 +295,7 @@ public:
         this->poz_turn = poz_turn_;
     }
 
-    [[nodiscard]] std::string get_nume_turn() const
+    [[nodiscard]] const std::string& get_nume_turn() const
     {
         return nume_turn;
     }
@@ -384,10 +384,10 @@ public:
         return nr_vieti;
     }
 
-    [[nodiscard]] int get_bani() const
-    {
-        return bani;
-    }
+    // [[nodiscard]] int get_bani() const
+    // {
+    //     return bani;
+    // }
 
     void actiuniJucator(const Inamic& inamic, const Drum& drum)
     {
@@ -540,9 +540,9 @@ void upgrade_Turn(Jucator& P, const std::vector<int>& upgrade_val)
         if (al == 'y')
         {
             std::cout << "Carui turn vrei sa ii faci upgrade?(alege indexul turnului) \n";
-            for (int i = 0; i < P.get_turnuri().size(); i++)
+            for (long unsigned int i = 0; i < P.get_turnuri().size(); i++)
                 std::cout << i + 1 << ". " << P.get_turnuri()[i] << std::endl;
-            int t;
+            long unsigned int t;
             fin >> t;
             if (t >= 1 && t <= P.get_turnuri().size())
                 P.upgrade(t, upgrade_val);
