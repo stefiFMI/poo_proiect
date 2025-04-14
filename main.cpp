@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <fstream>
 
-std::ifstream fin("tastatura.txt");
 
 class Jucator;
 
@@ -152,7 +151,7 @@ public:
 
     friend std::ostream& operator<<(std::ostream& os, const Inamic& obj)
     {
-        return os << "HP: " << obj.HP << " nume_inamic: " << obj.nume_inamic;
+        return os << "HP ramas: " << obj.HP << " nume_inamic: " << obj.nume_inamic;
     }
 
     void mutaInamic(const Drum& drum);
@@ -342,8 +341,7 @@ void Turn::ataca(Inamic& inamic) const
     if (detecteazaInamic(inamic))
     {
         inamic.set_hp(inamic.get_HP() - damage[nivel - 1]);
-        std::cout << "Turnul " << nume_turn << " a lovit inamicul " << inamic.get_nume_inamic()
-              << "! HP ramas: " << inamic.get_HP() << std::endl;
+        std::cout << "Turnul " << nume_turn << " a lovit inamicul " << inamic << std::endl;
     }
 }
 
@@ -389,7 +387,7 @@ public:
     //     return bani;
     // }
 
-    void actiuniJucator(const Inamic& inamic, const Drum& drum)
+    void statusJucator(const Inamic& inamic, const Drum& drum)
     {
         if (inamic.mort())
         {
@@ -445,7 +443,7 @@ void Jucator::alegeSiPlaseazaTurn(const std::vector<Turn>& turnuriDisponibile, c
 
     int alegere;
     std::cout << "Alege un turn (un numar de la 1 la 4) sau apasa 0 pentru a anula: ";
-    fin >> alegere;
+    std::cin >> alegere;
     if (alegere < 0 || alegere > 4)
     {
         std::cout << "Alegere invalida\n";
@@ -478,7 +476,7 @@ bool Jucator::alegePozTurn(const std::vector<Pozitie>& p_turnuri, Turn& T) const
         else
             std::cout << p_turnuri[i] << ": ";
 
-    fin >> x >> y;
+    std::cin >> x >> y;
     const Pozitie pozNoua(x, y);
     bool ok = false;
 
@@ -536,14 +534,14 @@ void upgrade_Turn(Jucator& P, const std::vector<int>& upgrade_val)
     while (al == 'y')
     {
         std::cout << "Vrei sa faci upgrade unui turn? y/n:\n";
-        fin >> al;
+        std::cin >> al;
         if (al == 'y')
         {
             std::cout << "Carui turn vrei sa ii faci upgrade?(alege indexul turnului) \n";
             for (long unsigned int i = 0; i < P.get_turnuri().size(); i++)
                 std::cout << i + 1 << ". " << P.get_turnuri()[i] << std::endl;
             long unsigned int t;
-            fin >> t;
+            std::cin >> t;
             if (t >= 1 && t <= P.get_turnuri().size())
                 P.upgrade(t, upgrade_val);
             else
@@ -615,7 +613,7 @@ int main()
         {
             std::cout << "Vrei sa amplasezi un turn?  y/n: ";
             char yn;
-            fin >> yn;
+            std::cin >> yn;
             if (yn == 'y')
                 P1.alegeSiPlaseazaTurn(turnuriDisponibile, poz_pos_turn);
             bucla_joc = true;
@@ -643,7 +641,7 @@ int main()
             if (bucla_joc == false)
                 for (const Inamic& inamic : inamici_wave)
                 {
-                    P1.actiuniJucator(inamic, drum);
+                    P1.statusJucator(inamic, drum);
                 }
 
 
@@ -652,12 +650,12 @@ int main()
             if (bucla_joc == false)
             {
                 std::cout << "\n--- Tura urmatoare ---\n";
-                fin.get();
+                std::cin.get();
             }
         }
 
         std::cout << "\nWave-ul " << wave << " finalizat!\n";
-        fin.get();
+        std::cin.get();
 
     }
 
