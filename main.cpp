@@ -156,7 +156,7 @@ public:
 
     void mutaInamic(const Drum& drum);
 
-    [[nodiscard]] Pozitie getPozInamic() const
+    [[nodiscard]] Pozitie get_Poz_Inamic() const
     {
         return poz_curenta;
     }
@@ -165,10 +165,10 @@ public:
         return HP;
     }
 
-    [[nodiscard]] const std::string& get_nume_inamic() const
-    {
-        return nume_inamic;
-    }
+    // [[nodiscard]] const std::string& get_nume_inamic() const
+    // {
+    //     return nume_inamic;
+    // }
 
     void set_hp(const int hp)
     {
@@ -328,8 +328,8 @@ public:
 
 bool Turn::detecteazaInamic(const Inamic& inamic) const
 {
-        float const dx = inamic.getPozInamic().getX() - poz_turn.getX();
-        float const dy = inamic.getPozInamic().getY() - poz_turn.getY();
+        float const dx = inamic.get_Poz_Inamic().getX() - poz_turn.getX();
+        float const dy = inamic.get_Poz_Inamic().getY() - poz_turn.getY();
 
         if (range[nivel - 1] >= std::sqrt(dx * dx + dy * dy))
             return true;
