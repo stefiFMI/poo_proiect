@@ -4,6 +4,8 @@
 #include <vector>
 #include <algorithm>
 #include <fstream>
+#include <random>
+#include <memory>
 
 
 class Jucator;
@@ -13,7 +15,7 @@ class Pozitie
     float x;
     float y;
 public:
-    Pozitie(const float& X, const float& Y) : x{X}, y{Y}{}
+    Pozitie(const float& X = 0, const float& Y = 0) : x{X}, y{Y}{}
 
     friend std::ostream& operator<<(std::ostream& os, const Pozitie& obj)
     {
@@ -97,19 +99,19 @@ class Inamic
         std::string tip;
     };
     movement_speed move_spd;
-    bool rez_magie;
     Pozitie poz_curenta;
     unsigned long long index_pozitie;
+    bool rez_magie;
 
 public:
     Inamic(const std::string& nume, const int hp, const int sum, const movement_speed& move_s,
-        const bool& rez, const Pozitie& poz_c) :
+           const Pozitie& poz_c, const bool rez_m) :
     nume_inamic{nume},
     HP{hp},
     suma{sum},
     move_spd{move_s},
-    rez_magie{rez},
     poz_curenta{poz_c},
+    rez_magie{rez_m},
     index_pozitie{0}{}
 
     Inamic(const Inamic& other) :
@@ -117,8 +119,8 @@ public:
     HP{other.HP},
     suma{other.suma},
     move_spd{other.move_spd},
-    rez_magie{other.rez_magie},
     poz_curenta{other.poz_curenta},
+    rez_magie{other.rez_magie},
     index_pozitie{other.index_pozitie}
     {}
 
@@ -133,8 +135,8 @@ public:
         suma =other.suma;
         move_spd.val = other.move_spd.val;
         move_spd.tip = other.move_spd.tip;
-        rez_magie = other.rez_magie;
         poz_curenta = other.poz_curenta;
+        rez_magie = other.rez_magie;
         index_pozitie = other.index_pozitie;
         return *this;
     }
@@ -142,8 +144,8 @@ public:
     friend bool operator==(const Inamic& other1, const Inamic& other2)
     {
         if (other1.HP == other2.HP && other1.nume_inamic == other2.nume_inamic && other1.suma == other2.suma &&
-            other1.move_spd.val == other2.move_spd.val && other1.move_spd.tip == other2.move_spd.tip &&
-            other1.rez_magie == other2.rez_magie && other1.poz_curenta == other2.poz_curenta)
+            other1.move_spd.val == other2.move_spd.val && other1.move_spd.tip == other2.move_spd.tip && other1.rez_magie == other2.rez_magie &&
+            other1.poz_curenta == other2.poz_curenta)
             return true;
         return false;
     }
@@ -151,7 +153,7 @@ public:
 
     friend std::ostream& operator<<(std::ostream& os, const Inamic& obj)
     {
-        return os << "HP ramas: " << obj.HP << " nume_inamic: " << obj.nume_inamic;
+        return os << obj.nume_inamic << " | " << "HP ramas: " << obj.HP;
     }
 
     void mutaInamic(const Drum& drum);
@@ -160,24 +162,20 @@ public:
     {
         return poz_curenta;
     }
-    [[nodiscard]] int get_HP() const
-    {
-        return HP;
-    }
-
-    // [[nodiscard]] const std::string& get_nume_inamic() const
+    // [[nodiscard]] int get_HP() const
     // {
-    //     return nume_inamic;
+    //     return HP;
     // }
 
-    void set_hp(const int hp)
-    {
-        HP = hp;
-    }
 
-    [[nodiscard]] bool mort() const    // logica de inamic mort ?????
+    [[nodiscard]] bool mort() const
     {
         return HP <= 0;
+    }
+
+    bool rez_la_magie() const
+    {
+        return rez_magie;
     }
 
     [[nodiscard]] bool final_drum(const Drum& drum) const
@@ -197,6 +195,8 @@ public:
 
     [[nodiscard]] int getSuma() const { return suma; }
 
+    void iaDamage(const int& dmg);
+
 };
 
 void Inamic::mutaInamic(const Drum& drum)
@@ -208,19 +208,29 @@ void Inamic::mutaInamic(const Drum& drum)
     }
 }
 
+void Inamic::iaDamage(const int& dmg)
+{
+    HP = HP - dmg;
+    if (HP < 0)
+        HP = 0;
+}
+
+
 class Glont
 {
-    int viteza;
+    int viteza{};
     Pozitie poz_plecare;
     Pozitie poz_finala;
 
 public:
 
-    Glont(const int viteza, const Pozitie& poz_plecare, const Pozitie& poz_finala)
-        : viteza(viteza),
-          poz_plecare(poz_plecare),
-          poz_finala(poz_finala)
-    {}
+    Glont() = default;
+
+    // Glont(const int viteza, const Pozitie& poz_plecare, const Pozitie& poz_finala)
+    //     : viteza(viteza),
+    //       poz_plecare(poz_plecare),
+    //       poz_finala(poz_finala)
+    // {}
 
     friend std::ostream& operator<<(std::ostream& os, const Glont& object)
     {
@@ -243,15 +253,22 @@ public:
 class Turn
 {
     std::string nume_turn;
-    Glont tip_glont;
-    Pozitie poz_turn;   // nici asta
+    Glont tip_glont{};
+protected:
+    Pozitie poz_turn{0, 0};   // nici asta
     std::vector<int> damage;
+private:
     std::vector<double> range;
     std::vector<int> attk_spd;
     std::vector<int> pret;
-    int nivel;
+protected:
+    int nivel{};
+
+    inline static std::vector<Inamic>* inamici_context = nullptr;
 
 public:
+
+    //Turn() = default;
     Turn(const std::string& nume_t,
             const Glont& tip_g,
             const std::vector<int>& dmg,
@@ -260,18 +277,26 @@ public:
             const std::vector<int>& prt,
             const int& niv) :   nume_turn{nume_t},
                                 tip_glont{tip_g},
-                                poz_turn{0, 0},
                                 damage{dmg},
                                 range{rng},
                                 attk_spd{atk},
                                 pret{prt},
                                 nivel{niv} {}
 
+    virtual ~Turn() = default;
+
+    [[nodiscard]] virtual std::shared_ptr<Turn> clone() const = 0;
+
     friend std::ostream& operator<<(std::ostream& os, const Turn& object)
     {
-        return os << object.nume_turn << " Nivel: " << object.nivel;
+        os << object.nume_turn << " Nivel: " << object.nivel << " ";
+        object.afisare(os);
+        return os;
     }
+private:
+    virtual void afisare(std::ostream& os) const {}
 
+public:
     friend bool operator==(const Turn& lhs, const Turn& rhs)
     {
         return lhs.nume_turn == rhs.nume_turn
@@ -287,6 +312,11 @@ public:
     friend bool operator!=(const Turn& lhs, const Turn& rhs)
     {
         return !(lhs == rhs);
+    }
+
+    static void seteazaContextInamici(std::vector<Inamic>& inamici)
+    {
+        inamici_context = &inamici;
     }
 
     void set_poz_turn(const Pozitie& poz_turn_)
@@ -319,30 +349,221 @@ public:
         if (nivel <= 4)
             nivel++;
     }
-private:
+protected:
     [[nodiscard]] bool detecteazaInamic(const Inamic& inamic) const;
 public:
-    void ataca(Inamic& inamic) const;
+    virtual void ataca(Inamic& inamic) const = 0;
+    [[nodiscard]] double distanta(const Pozitie& poz1, const Pozitie& poz2) const
+    {
+        double const dx = poz1.getX() - poz2.getX();
+        double const dy = poz1.getY() - poz2.getY();
+        return sqrt(dx * dx + dy * dy);
+    }
 
 };
 
 bool Turn::detecteazaInamic(const Inamic& inamic) const
 {
-        float const dx = inamic.get_Poz_Inamic().getX() - poz_turn.getX();
-        float const dy = inamic.get_Poz_Inamic().getY() - poz_turn.getY();
+        double const dist = distanta(inamic.get_Poz_Inamic(), poz_turn);
 
-        if (range[nivel - 1] >= std::sqrt(dx * dx + dy * dy))
+        if (range[nivel - 1] >= dist)
             return true;
     return false;
 }
 
-void Turn::ataca(Inamic& inamic) const
+// void Turn::ataca(Inamic& inamic) const
+// {
+//     if (detecteazaInamic(inamic))
+//     {
+//         inamic.iaDamage(damage[nivel - 1]);
+//         std::cout << "Turnul " << nume_turn << " a lovit inamicul " << inamic << std::endl;
+//     }
+// }
+
+
+class TurnInvatat : public Turn   // critical chance
+{
+    std::vector<double> sansa_crit;
+    std::vector<double> val_crit;
+
+public:
+
+    TurnInvatat(const std::string& nume_t,
+            const Glont& tip_g,
+            const std::vector<int>& dmg,
+            const std::vector<double>& rng,
+            const std::vector<int>& atk,
+            const std::vector<int>& prt,
+            const int& niv,
+            const std::vector<double>& sc,
+            const std::vector<double>& vc) : Turn(nume_t, tip_g, dmg, rng, atk, prt, niv), sansa_crit{sc}, val_crit{vc} {}
+
+    ~TurnInvatat() override = default;
+
+    void afisare(std::ostream& os) const override
+    {
+        os << "cu sansa crit de " << sansa_crit[nivel - 1] * 100 << "%";
+    }
+
+    [[nodiscard]] std::shared_ptr<Turn> clone() const override { return std::make_shared<TurnInvatat>(*this); }
+
+    void ataca(Inamic& inamic) const override;
+
+private:
+    [[nodiscard]] bool sansaCritHit() const;
+};
+
+bool TurnInvatat::sansaCritHit() const
+{
+    static std::mt19937 gen(std::random_device{}());
+    static std::uniform_real_distribution dist(0.0, 1.0);
+    return dist(gen) < sansa_crit[nivel - 1];
+}
+
+void TurnInvatat::ataca(Inamic& inamic) const
 {
     if (detecteazaInamic(inamic))
     {
-        inamic.set_hp(inamic.get_HP() - damage[nivel - 1]);
-        std::cout << "Turnul " << nume_turn << " a lovit inamicul " << inamic << std::endl;
+        if (sansaCritHit())
+        {
+            inamic.iaDamage(static_cast<int>(damage[nivel - 1] * val_crit[nivel - 1]));
+            std::cout << "Turnul " << *this << " a lovit inamicul cu critical hit\n" << inamic << "\n";
+        }
+        else
+        {
+            inamic.iaDamage(damage[nivel - 1]);
+            std::cout << "Turnul " << *this << " a lovit inamicul fara critical hit\n" << inamic << std::endl;
+        }
     }
+}
+
+
+class TurnRedbull : public Turn  // magic damage
+{
+public:
+    TurnRedbull(const std::string& nume_t,
+            const Glont& tip_g,
+            const std::vector<int>& dmg,
+            const std::vector<double>& rng,
+            const std::vector<int>& atk,
+            const std::vector<int>& prt,
+            const int& niv) : Turn(nume_t, tip_g, dmg, rng, atk, prt, niv) {}
+    ~TurnRedbull() override = default;
+
+    void afisare(std::ostream& os) const override
+    {
+        os << "cu damage magic ";
+    }
+
+    [[nodiscard]] std::shared_ptr<Turn> clone() const override { return std::make_shared<TurnRedbull>(*this); }
+
+
+    void ataca(Inamic& inamic) const override;
+};
+
+void TurnRedbull::ataca(Inamic& inamic) const
+{
+    if (detecteazaInamic(inamic))
+    {
+        if (inamic.rez_la_magie())
+        {
+            inamic.iaDamage(damage[nivel - 1] / 2);
+            std::cout << *this << " a lovit un inamic cu rezistenta la magie\n" << inamic << "\n";
+        }
+        else
+        {
+            inamic.iaDamage(damage[nivel - 1]);
+            std::cout << "Turnul " << *this << "a lovit inamicul\n" << inamic << std::endl;
+        }
+    }
+}
+
+class TurnSomn : public Turn  // splash damage
+{
+    double raza_splash;
+public:
+    TurnSomn(const std::string& nume_t,
+                const Glont& tip_g,
+                const std::vector<int>& dmg,
+                const std::vector<double>& rng,
+                const std::vector<int>& atk,
+                const std::vector<int>& prt,
+                const int& niv,
+                const double& raza) : Turn(nume_t, tip_g, dmg, rng, atk, prt, niv), raza_splash{raza} {}
+    ~TurnSomn() override = default;
+
+    void afisare(std::ostream& os) const override
+    {
+        os << "cu splash damage ";
+    }
+
+    [[nodiscard]] std::shared_ptr<Turn> clone() const override { return std::make_shared<TurnSomn>(*this); }
+
+
+    void ataca(Inamic& inamic) const override;
+};
+
+void TurnSomn::ataca(Inamic& inamic) const
+{
+    if (!inamici_context)
+        return;
+
+    std::cout << "Turnul " << *this << "loveste pe " << inamic << " si aplica splash:\n";
+
+    for (Inamic& i : *inamici_context)
+    {
+        double dist = distanta(i.get_Poz_Inamic(), inamic.get_Poz_Inamic());
+
+        if (!i.mort() && dist <= raza_splash)
+        {
+            i.iaDamage(damage[nivel - 1]);
+            std::cout << "-> Inamic " << i << " a primit " << damage[nivel - 1] << " splash damage\n";
+        }
+    }
+}
+
+class TurnIntrebari : public Turn  // long range
+{
+    double rangeL;
+public:
+    TurnIntrebari(const std::string& nume_t,
+                const Glont& tip_g,
+                const std::vector<int>& dmg,
+                const std::vector<double>& rng,
+                const std::vector<int>& atk,
+                const std::vector<int>& prt,
+                const int& niv,
+                const double& range) : Turn(nume_t, tip_g, dmg, rng, atk, prt, niv), rangeL{range} {}
+    ~TurnIntrebari() override = default;
+
+    void afisare(std::ostream& os) const override
+    {
+        os << "cu range mare ";
+    }
+
+    [[nodiscard]] std::shared_ptr<Turn> clone() const override { return std::make_shared<TurnIntrebari>(*this); }
+
+    void ataca(Inamic& inamic) const override;
+    bool detecteazaInamic(const Inamic& inamic, const double& range) const;
+
+};
+
+void TurnIntrebari::ataca(Inamic& inamic) const
+{
+    if (detecteazaInamic(inamic, rangeL))
+    {
+        inamic.iaDamage(damage[nivel - 1]);
+        std::cout << "Turnul " << *this << " a lovit inamicul " << inamic << " la distanta mare\n";
+    }
+}
+
+bool TurnIntrebari::detecteazaInamic(const Inamic& inamic, const double& range) const
+{
+    double const dist = distanta(inamic.get_Poz_Inamic(), poz_turn);
+
+    if (range >= dist)
+        return true;
+    return false;
 }
 
 
@@ -351,9 +572,9 @@ class Jucator
     std::string nume_jucator;
     int bani;
     int nr_vieti;
-    std::vector<Turn> turnuri;
+    std::vector<std::shared_ptr<Turn>> turnuri;
 public:
-    Jucator(const std::string& nume_jucator, int bani, int nr_vieti, const std::vector<Turn>& turnuri)
+    Jucator(const std::string& nume_jucator, int bani, int nr_vieti, const std::vector<std::shared_ptr<Turn>>& turnuri)
         : nume_jucator(nume_jucator),
           bani(bani),
           nr_vieti(nr_vieti),
@@ -372,7 +593,7 @@ private:
     void castigaBani(const Inamic& inamic) { bani = bani + inamic.getSuma(); }
 
 public:
-    [[nodiscard]] const std::vector<Turn>& get_turnuri() const
+    [[nodiscard]] const std::vector<std::shared_ptr<Turn>>& get_turnuri() const
     {
         return turnuri;
     }
@@ -402,25 +623,29 @@ public:
             }
     }
 
-    void scadeBani(const int valoare)
+    bool scadeBani(const int valoare)
     {
         if (bani >= valoare)
         {
             bani = bani - valoare;
-            std::cout << "Mai ai : " << bani << " de bani\n";
+            if (bani >= 20)
+                std::cout << "Mai ai : " << bani << " de bani\n";
+            else
+                std::cout << "Mai ai : " << bani << " bani\n";
+            return true;
         }
-        else
-            std::cout << "Nu ai destui bani!\n";
+        std::cout << "Nu ai destui bani!\n";
+        return false;
     }
 private:
-    bool alegePozTurn(const std::vector<Pozitie>& p_turnuri, Turn& T) const;
+    bool alegePozTurn(const std::vector<Pozitie>& p_turnuri, std::shared_ptr<Turn>& T) const;
 
-    void plaseazaTurn(const Turn& turn)
+    void plaseazaTurn(const std::shared_ptr<Turn>& turn)
     {
-        if (bani >= turn.get_Pret())
+        if (bani >= turn->get_Pret())
         {
-            std::cout << "Ai plasat turnul la pozitia " << turn.getPoz_pos() << std::endl;
-            scadeBani(turn.get_Pret());
+            std::cout << "Ai plasat turnul la pozitia " << turn->getPoz_pos() << std::endl;
+            scadeBani(turn->get_Pret());
             turnuri.push_back(turn);
         }
         else
@@ -428,17 +653,17 @@ private:
     }
 
 public:
-    void alegeSiPlaseazaTurn(const std::vector<Turn>& turnuriDisponibile, const std::vector<Pozitie>& p_turnuri);
+    void alegeSiPlaseazaTurn(const std::vector<std::shared_ptr<Turn>>& turnuriDisponibile, const std::vector<Pozitie>& p_turnuri);
 
-    void upgrade(int t, const std::vector<int>& upgrade_val);
+    void upgrade(unsigned long t, const std::vector<int>& upgrade_val);
 };
 
-void Jucator::alegeSiPlaseazaTurn(const std::vector<Turn>& turnuriDisponibile, const std::vector<Pozitie>& p_turnuri)
+void Jucator::alegeSiPlaseazaTurn(const std::vector<std::shared_ptr<Turn>>& turnuriDisponibile, const std::vector<Pozitie>& p_turnuri)
 {
     std::cout << "\nTurnuri disponibile:\n";
-    for (long long unsigned int i = 0; i < turnuriDisponibile.size(); i++)
+    for (auto i = 0ull; i < turnuriDisponibile.size(); i++)
     {
-        std::cout << i + 1 << ". " << turnuriDisponibile[i] << " | Pret: " << turnuriDisponibile[i].get_Pret() << "\n";
+        std::cout << i + 1 << ". " << *turnuriDisponibile[i] << " | Pret: " << turnuriDisponibile[i]->get_Pret() << "\n";
     }
 
     int alegere;
@@ -456,7 +681,7 @@ void Jucator::alegeSiPlaseazaTurn(const std::vector<Turn>& turnuriDisponibile, c
         return;
     }
 
-    Turn turnAles = turnuriDisponibile[alegere - 1];
+    std::shared_ptr<Turn> turnAles = turnuriDisponibile[alegere - 1]->clone();
 
     if (alegePozTurn(p_turnuri, turnAles))
     {
@@ -464,13 +689,13 @@ void Jucator::alegeSiPlaseazaTurn(const std::vector<Turn>& turnuriDisponibile, c
     }
 }
 
-bool Jucator::alegePozTurn(const std::vector<Pozitie>& p_turnuri, Turn& T) const   // jucatorul trebuie sa aleaga o pozitie valida pe care sa isi amplaseze turnul
+bool Jucator::alegePozTurn(const std::vector<Pozitie>& p_turnuri, std::shared_ptr<Turn>& T) const   // jucatorul trebuie sa aleaga o pozitie valida pe care sa isi amplaseze turnul
 {
     float x, y;
 
     std::cout << "Pozitii posibile: ";
 
-    for (long long unsigned int i = 0; i < p_turnuri.size(); i++)
+    for (auto i = 0ull; i < p_turnuri.size(); i++)
         if (i != p_turnuri.size() - 1)
             std::cout << p_turnuri[i] << " sau ";
         else
@@ -490,27 +715,29 @@ bool Jucator::alegePozTurn(const std::vector<Pozitie>& p_turnuri, Turn& T) const
     if (ok == true)
     {
         for (const auto& p : turnuri)   // verific daca pozitiile turnurilor sunt deja ocupate
-            if (p.getPoz_pos() == pozNoua)
+            if (p->getPoz_pos() == pozNoua)
             {
                 std::cout << "Exista deja un turn pe aceasta pozitie!\n";
                 return false;
             }
 
-        if (T.getPoz_pos().getX() == 0 && T.getPoz_pos().getY() == 0)
-            T.set_poz_turn(pozNoua);
+        if (T->getPoz_pos().getX() == 0 && T->getPoz_pos().getY() == 0)
+            T->set_poz_turn(pozNoua);
         return true;
     }
     std::cout << "Pozitie invalida";
     return false;
 }
 
-void Jucator::upgrade(const int t, const std::vector<int>& upgrade_val)
+void Jucator::upgrade(const unsigned long t, const std::vector<int>& upgrade_val)
 {
-    if (turnuri[t - 1].get_nivel() < 4)
+    if (turnuri[t - 1]->get_nivel() < 4)
     {
-        scadeBani(upgrade_val[turnuri[t - 1].get_nivel()]);
-        turnuri[t - 1].cresteNivel();
-        std::cout << "Nivelul nou al turnului " << turnuri[t - 1].get_nume_turn() <<": " << turnuri[t - 1].get_nivel() << std::endl;
+        if (scadeBani(upgrade_val[turnuri[t - 1]->get_nivel()]))
+        {
+            turnuri[t - 1]->cresteNivel();
+            std::cout << "Nivelul nou al turnului " << turnuri[t - 1]->get_nume_turn() <<": " << turnuri[t - 1]->get_nivel() << std::endl;
+        }
     }
     else
         std::cout << "Nivel maxim atins\n";
@@ -539,7 +766,7 @@ void upgrade_Turn(Jucator& P, const std::vector<int>& upgrade_val)
         {
             std::cout << "Carui turn vrei sa ii faci upgrade?(alege indexul turnului) \n";
             for (long unsigned int i = 0; i < P.get_turnuri().size(); i++)
-                std::cout << i + 1 << ". " << P.get_turnuri()[i] << std::endl;
+                std::cout << i + 1 << ". " << *P.get_turnuri()[i] << std::endl;
             long unsigned int t;
             std::cin >> t;
             if (t >= 1 && t <= P.get_turnuri().size())
@@ -550,9 +777,151 @@ void upgrade_Turn(Jucator& P, const std::vector<int>& upgrade_val)
     }
 }
 
+class Joc
+{
+    Drum drum;
+    std::vector<Pozitie> poz_pos_turn;
+    std::vector<std::shared_ptr<Turn>> turnuriDisponibile;
+    std::vector<std::vector<Inamic>> inamici;
+    Jucator jucator;
+    int numar_wave;
+    std::vector<int> costuri_upgrade;
+public:
+    Joc() :
+        drum{{
+            {0, 0}, {1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0}, {9, 0},
+            {9, 1}, {9, 2}, {9, 3}, {9, 4}, {9, 5}, {9, 6}, {9, 7}, {9, 8}, {9, 9}, {9, 10}
+                }},
+        poz_pos_turn{{ {1, 1}, {1, -1}, {7, -1}, {10, 3}, {8, 8} }}, jucator{"Anonim,", 300, 10, {}},
+        numar_wave{3},
+        costuri_upgrade{{70, 110, 160, 210}}
+    {
+        Glont g1;
+        const std::vector<double> sc = {0, 0.2, 0.6, 0.8};
+        const std::vector<double> vc = {1, 1.3, 1.6, 2};
+        const std::vector dmgt1 = {4,7,10,13};
+        const std::vector dmgt2 = {10,15,20,25};
+        const std::vector dmgt3 = {6,13,17,20};
+        const std::vector dmgt4 = {2,4,7,10};
+        const std::vector<double> rng1 = {1.5,1.7,1.9,2.1};
+        const std::vector<double> rng2 = {1.3,1.4,1.5,1.7};
+        const std::vector<double> rng3 = {1,1.1,1.2,1.4};
+        const std::vector atk_spd = {1,2,3,4};
+        const std::vector<int> prt = {70, 110, 160, 210};
+        turnuriDisponibile = {
+            std::make_shared<TurnInvatat>("Invatat", g1, dmgt1, rng1, atk_spd, prt, 1, sc, vc),
+            std::make_shared<TurnRedbull>("Redbull", g1, dmgt3, rng2, atk_spd, prt, 1),
+            std::make_shared<TurnSomn>("Somn", g1, dmgt2, rng3, atk_spd, prt, 1, 1.5),
+            std::make_shared<TurnIntrebari>("Intrebari", g1, dmgt4, rng3, atk_spd, prt, 1, 3),
+        };
+
+        inamici = {
+            {
+                Inamic{"BD", 10, 5, {1, "mediu"}, {0, 0}, false},
+                Inamic{"LMC", 25, 7, {1, "mediu"}, {0, 0}, true},
+                Inamic{"GAL", 70, 10, {1, "rapid"}, {0, 0}, false}
+            },
+
+            {
+                Inamic{"SD", 300, 30, {1, "lent"}, {0, 0}, false},
+                Inamic{"LFA", 100, 15, {1, "rapid"}, {0, 0}, true}
+            },
+
+            {
+                Inamic{"POO", 1000, 100, {1, "lent"}, {0, 0}, true}
+            }
+        };
+
+        std::string nume;
+        std::cout << "Alege un nume: ";
+        std::cin >> nume;
+        jucator = Jucator{nume, 300, 10, {}};
+    }
+
+    void ruleaza();
+};
+
+void Joc::ruleaza()
+{
+    std::cout << jucator << "\n";
+    jucator.alegeSiPlaseazaTurn(turnuriDisponibile, poz_pos_turn);
+
+    for (int wave = 0; wave < numar_wave && jucator.get_nr_vieti() > 0; wave++)
+    {
+        std::cout << "\n--- Wave " << wave + 1 << "/" << numar_wave << " ---\n";
+        upgrade_Turn(jucator, costuri_upgrade);
+
+        bool bucla_joc = false;
+        while (!bucla_joc)
+        {
+            char yn;
+            std::cout << "Vrei sa amplasezi un turn? y/n: ";
+            std::cin >> yn;
+            if (yn == 'y')
+                jucator.alegeSiPlaseazaTurn(turnuriDisponibile, poz_pos_turn);
+            bucla_joc = true;
+
+            for (Inamic& i : inamici[wave])
+            {
+                if (!i.mort() && !i.final_drum(drum))
+                {
+                    i.mutaInamic(drum);
+                    i.afiseazaPoz(drum);
+                    bucla_joc = false;
+                }
+            }
+
+            for (const auto& t : jucator.get_turnuri())
+            {
+                for (Inamic& i : inamici[wave])
+                {
+                    if (!i.mort())
+                        t->ataca(i);
+                }
+            }
+
+            if (!bucla_joc)
+            {
+                for (const Inamic& i : inamici[wave])
+                    jucator.statusJucator(i, drum);
+            }
+
+            auto& v = inamici[wave];
+            v.erase(std::remove_if(v.begin(), v.end(),
+                        [](const Inamic& i) { return i.mort(); }), v.end());
+
+            if (!bucla_joc)
+            {
+                std::cout << "\n--- Tura urmatoare ---\n";
+                std::cin.get();
+            }
+        }
+
+        std::cout << "\nWave-ul " << wave + 1 << " finalizat!\n";
+        std::cin.get();
+    }
+
+    if (jucator.get_nr_vieti() <= 0)
+        std::cout << "\nGAME OVER! Ai ramas fara RESTANTE disponibile. Ai picat anul...\n";
+    else
+        std::cout << "\nFELICITARI! Ai trecut anul.\n";
+}
+
+
 int main()
 {
+    try
+    {
+        Joc joc;
+        joc.ruleaza();
+    }catch (const std::exception& e)
+    {
+        std::cerr << "Eroare" << e.what() << "\n";
+    }
 
+
+    /*const std::vector<double> sc = {0, 0.2, 0.6, 0.8};
+    const std::vector<double> vc = {1, 1.3, 1.6, 2};
     const std::vector<Pozitie> traseu = { {0, 0}, {1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0}, {9, 0}, // Orizontal (10 pași)
                                              {9, 1}, {9, 2}, {9, 3}, {9, 4}, {9, 5}, {9, 6}, {9, 7}, {9, 8}, {9, 9}, {9, 10} };
 
@@ -569,100 +938,25 @@ int main()
     const std::vector<int> prt = {70, 110, 160, 210};
 
     Pozitie p1{0, 0};
-    Glont g1{2, p1, p1};
-    Turn t1{"Invatat", g1, dmgt1, rng1, atk_spd, prt, 1};
-    Turn t2{"Somn", g1, dmgt2, rng1, atk_spd, prt, 1};
-    Turn t3{"Redbull", g1, dmgt3, rng2, atk_spd, prt, 1};
-    Turn t4{"Intrebari", g1, dmgt4, rng3, atk_spd, prt, 1};
+    Glont g1;
+    TurnInvatat t1{"Invatat", g1, dmgt1, rng1, atk_spd, prt, 4, sc, vc};
+    TurnRedbull t2{"Redbull", g1, dmgt3, rng2, atk_spd, prt, 4};
+    TurnSomn t3{"Somn", g1, dmgt4, rng3, atk_spd, prt, 4, 1.5};
 
+    //std::cout << t1;
 
-    std::vector<Turn> turnuriDisponibile = {t1, t2, t3, t4};
-    std::vector<Turn> turnuri;
-    Jucator P1{"stefi", 300, 10, turnuri};
+    Inamic i{"BD", 45, 34, {4, "df"}, {1,1}, true};
+    Inamic i1{"GAL", 75, 14, {4, "df"}, {1,1}, false};
 
-    Inamic i1{"BD", 10, 5, {1, "mediu"}, false, {0, 0}};
-    Inamic i2{"SD", 300, 30, {1, "lent"}, false, {0, 0}};
-    Inamic i3{"LFA", 100, 15, {1, "rapid"}, false, {0, 0}};
-    Inamic i4{"GAL", 70, 10, {1, "rapid"}, false, {0, 0}};
-    Inamic i5{"LMC", 25, 7, {1, "mediu"}, false, {0, 0}};
-    Inamic i6{"POO", 1000, 100, {1, "lent"}, false, {0, 0}};
+    Inamic* ii = &i;
+    Inamic* ii1 = &i1;
 
-    std::cout << P1 << std::endl;
-    P1.alegeSiPlaseazaTurn(turnuriDisponibile, poz_pos_turn);
+    std::vector<Inamic> Inamici = {i, i1};
+    Turn::seteazaContextInamici(Inamici);
 
-
-    for (int wave = 1; wave <= 3 && P1.get_nr_vieti() > 0; wave++)
-    {
-        std::cout << "\n--- Wave " << wave << "/3 ---\n";
-
-        upgrade_Turn(P1, prt);
-
-        std::vector<Inamic> inamici_wave;
-
-        if (wave == 1)
-            inamici_wave = {i1, i5};
-        else
-            if (wave == 2)
-                inamici_wave = {i2, i3};
-            else
-                if (wave == 3)
-                    inamici_wave = {i6};
-
-        bool bucla_joc = false;
-        while (!bucla_joc)
-        {
-            std::cout << "Vrei sa amplasezi un turn?  y/n: ";
-            char yn;
-            std::cin >> yn;
-            if (yn == 'y')
-                P1.alegeSiPlaseazaTurn(turnuriDisponibile, poz_pos_turn);
-            bucla_joc = true;
-
-            for (Inamic& inamic : inamici_wave)
-            {
-                if (!inamic.mort() && !inamic.final_drum(drum))
-                {
-                    inamic.mutaInamic(drum);
-                    inamic.afiseazaPoz(drum);
-                    bucla_joc = false;
-                }
-            }
-
-            for (const Turn& t : P1.get_turnuri())
-            {
-                for (Inamic& i : inamici_wave)
-                {
-                    if (!i.mort())
-                    {
-                        t.ataca(i);
-                    }
-                }
-            }
-            if (bucla_joc == false)
-                for (const Inamic& inamic : inamici_wave)
-                {
-                    P1.statusJucator(inamic, drum);
-                }
-
-
-            inamici_wave.erase(std::remove_if(inamici_wave.begin(), inamici_wave.end(),
-                [](const Inamic& i) { return i.mort(); }), inamici_wave.end());
-            if (bucla_joc == false)
-            {
-                std::cout << "\n--- Tura urmatoare ---\n";
-                std::cin.get();
-            }
-        }
-
-        std::cout << "\nWave-ul " << wave << " finalizat!\n";
-        std::cin.get();
-
-    }
-
-    if (P1.get_nr_vieti() <= 0)
-        std::cout << "\nGAME OVER! Ai ramas fara RESTANTE disponibile. Ai picat anul...\n";
-    else
-        std::cout << "\nFELICITARI! Ai trecut anul.\n";
+    t1.ataca(i);
+    t2.ataca(i1);
+    t3.ataca(i);*/
     return 0;
 }
 
